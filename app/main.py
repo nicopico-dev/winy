@@ -1,11 +1,16 @@
 import streamlit as st
-import ollama
+from ollama import Client
 import sqlite3
+import os
 from qdrant_client import QdrantClient
 st.set_page_config(page_title="Winy", page_icon="🍷", layout="centered")
 
+QDRANT_CLIENT_URL = os.environ["QDRANT_CLIENT"] 
+OLLAMA_URL = os.environ["OLLAMA"]
 
-client = QdrantClient("http://localhost:6333")
+
+client_qdrant = QdrantClient(QDRANT_CLIENT_URL)
+client_ollama = Client(host=OLLAMA_URL)
 
 @st.cache_resource
 def get_wines_names():
@@ -67,18 +72,18 @@ def show():
 
     def get_recommendation(query):
         prompt = PROMPT_TEMPLATE_1.format(query=query)
-        response = ollama.generate(model="mistral", prompt=prompt)
+        response = client_ollama.generate(model="mistral", prompt=prompt)
         return response["response"]
     
     def get_wines(query,llm_response):
         print(llm_response)
-        search_result = client.query(
+        search_result = client_qdrant.query(
         collection_name="wines5",
         query_text=llm_response
         )
         prompt = PROMPT_TEMPLATE_2.format(food=query,
                                           search_result=search_result)
-        response = ollama.generate(model="mistral", prompt=prompt)
+        response = client_ollama.generate(model="mistral", prompt=prompt)
         return response["response"]
 
     if prompt := st.chat_input():

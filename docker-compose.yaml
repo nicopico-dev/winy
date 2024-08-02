@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   qdrant:
     image: qdrant/qdrant # Specifies the Qdrant image to use
@@ -13,6 +11,9 @@ services:
     build:
       context: ./app # Specifies the build context as the ./app directory
       dockerfile: Dockerfile # Uses the Dockerfile in the build context
+    environment:
+      - QDRANT_CLIENT=http://qdrant:6333
+      - OLLAMA=http://ollama:11434
     container_name: winy # Sets the container name to winy
     ports:
       - "8501:8501" # Maps port 8501 on the host to port 8501 in the container
@@ -24,7 +25,7 @@ services:
     image: ollama/ollama # Specifies the Ollama image to use
     container_name: ollama # Sets the container name to ollama
     ports:
-      - "8000:8000" # Maps port 8000 on the host to port 8000 in the container
+      - "11434:11434" # Maps port 11434 on the host to port 11434 in the container
     deploy:
       resources:
         reservations:

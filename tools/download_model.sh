@@ -7,4 +7,4 @@ if [ -z "$1" ]; then
 fi
 
 # Run the docker exec command with ARG
-docker exec -it ollama ollama pull "$1"
+docker compose exec ollama ollama pull "$1"

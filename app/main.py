@@ -66,7 +66,7 @@ def show():
     FROM mistral
     SYSTEM You are a sommelier with extensive knowledge of wines from around the world.
     Your goal is to use the provided bullet point list of wines to suggest how to pair them with the food. 
-    Add additional, educative informantion about the wines. Just five sentences at max.
+    Add additional, educative information about the wines. Just five sentences at max.
     USER INPUT: Pair {food} with {search_result}
     '''
 

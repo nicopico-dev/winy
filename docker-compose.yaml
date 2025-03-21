@@ -13,19 +13,22 @@ services:
       dockerfile: Dockerfile # Uses the Dockerfile in the build context
     environment:
       - QDRANT_CLIENT=http://qdrant:6333
-      - OLLAMA=http://ollama:11434
+      #- OLLAMA=http://ollama:11434
+      - OLLAMA=http://host.docker.internal:11434
     container_name: winy # Sets the container name to winy
     ports:
       - "8501:8501" # Maps port 8501 on the host to port 8501 in the container
     depends_on:
       - qdrant # Ensures the qdrant service is started before winy
-      - ollama # Ensures the ollama service is started before winy
+      #- ollama # Ensures the ollama service is started before winy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
-  ollama:
-    image: ollama/ollama # Specifies the Ollama image to use
-    container_name: ollama # Sets the container name to ollama
-    ports:
-      - "11434:11434" # Maps port 11434 on the host to port 11434 in the container
+  # ollama:
+  #   image: ollama/ollama # Specifies the Ollama image to use
+  #   container_name: ollama # Sets the container name to ollama
+  #   ports:
+  #     - "11434:11434" # Maps port 11434 on the host to port 11434 in the container
 
 volumes:
   qdrant_data: # Defines the qdrant_data volume

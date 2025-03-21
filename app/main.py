@@ -78,8 +78,8 @@ def show():
     def get_wines(query,llm_response):
         print(llm_response)
         search_result = client_qdrant.query(
-        collection_name="wines5",
-        query_text=llm_response
+            collection_name="wines5",
+            query_text=llm_response
         )
         prompt = PROMPT_TEMPLATE_2.format(food=query,
                                           search_result=search_result)
@@ -91,6 +91,7 @@ def show():
         st.session_state.messages.append({"role": "user", "content": prompt})
         st.chat_message("user").write(prompt)
         pairing = get_recommendation(st.session_state.messages)
+        print("pairing", pairing)
         resp_wines = get_wines(st.session_state.messages,pairing)
         msg = add_wine_links(resp_wines)
         st.session_state.messages.append({"role": "assistant", "content": msg})

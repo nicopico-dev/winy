@@ -7,6 +7,7 @@ st.set_page_config(page_title="Winy", page_icon="🍷", layout="centered")
 
 QDRANT_CLIENT_URL = os.environ["QDRANT_CLIENT"] 
 OLLAMA_URL = os.environ["OLLAMA"]
+MODEL = "mistral"
 
 
 client_qdrant = QdrantClient(QDRANT_CLIENT_URL)
@@ -55,7 +56,7 @@ def show():
         st.chat_message(msg["role"]).write(msg["content"])
 
     PROMPT_TEMPLATE_1 = '''
-    FROM mistral
+    FROM {model}
     SYSTEM You are a sommelier with extensive knowledge of wines from around the world.
     Your goal is to provide the best possible information about wine taste paired with the food.
     Just in a single sentence, no other informations
@@ -63,7 +64,7 @@ def show():
     '''
 
     PROMPT_TEMPLATE_2 = '''
-    FROM mistral
+    FROM {model}
     SYSTEM You are a sommelier with extensive knowledge of wines from around the world.
     Your goal is to use the provided bullet point list of wines to suggest how to pair them with the food. 
     Add additional, educative information about the wines. Just five sentences at max.
@@ -71,19 +72,21 @@ def show():
     '''
 
     def get_recommendation(query):
-        prompt = PROMPT_TEMPLATE_1.format(query=query)
-        response = client_ollama.generate(model="mistral", prompt=prompt)
+        prompt = PROMPT_TEMPLATE_1.format(model=MODEL, query=query)
+        response = client_ollama.generate(model=MODEL, prompt=prompt)
         return response["response"]
     
-    def get_wines(query,llm_response):
-        print(llm_response)
+    def get_wines(query, llm_response):
         search_result = client_qdrant.query(
             collection_name="wines5",
             query_text=llm_response
         )
-        prompt = PROMPT_TEMPLATE_2.format(food=query,
-                                          search_result=search_result)
-        response = client_ollama.generate(model="mistral", prompt=prompt)
+        print(f"search_result: {search_result}")
+
+        prompt = PROMPT_TEMPLATE_2.format(
+            model=MODEL, food=query, search_result=search_result
+        )
+        response = client_ollama.generate(model=MODEL, prompt=prompt)
         return response["response"]
 
     if prompt := st.chat_input():
@@ -91,9 +94,11 @@ def show():
         st.session_state.messages.append({"role": "user", "content": prompt})
         st.chat_message("user").write(prompt)
         pairing = get_recommendation(st.session_state.messages)
-        print("pairing", pairing)
-        resp_wines = get_wines(st.session_state.messages,pairing)
+        print(f"pairing: {pairing}")
+
+        resp_wines = get_wines(st.session_state.messages, pairing)
         msg = add_wine_links(resp_wines)
+
         st.session_state.messages.append({"role": "assistant", "content": msg})
         st.chat_message("assistant").write(msg)
 
